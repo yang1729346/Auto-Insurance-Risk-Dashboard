@@ -37,7 +37,7 @@ zh_config = {'locale': 'zh-CN', 'displaylogo': False}
 # ==========================================
 @st.cache_data
 def load_and_clean_data():
-    df = pd.read_csv("car_insurance_claims.csv")
+    df = pd.read_csv("car_insurance_claims_2026.csv")
 
     claim_col = 'total_claim_amount'
     sex_col = 'insured_sex'
@@ -93,7 +93,9 @@ with st.sidebar:
     selected_age_segs = st.multiselect("选择年龄段", options=age_seg_options, default=age_seg_options)
 
     st.divider()
-    st.info("数据来源：天池车险索赔数据集")
+    st.info("数据来源：天池车险索赔开源数据")
+    st.caption(
+        "注：为贴合 2026 年真实商业环境，已使用 Python 对历史底层数据进行了时间轴平移，并基于行业理赔通胀率对案均赔款进行了趋势调整 (Trending)。")
 
 filtered_df = df[
     (df['性别'].isin(selected_gender)) &
