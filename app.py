@@ -1118,12 +1118,41 @@ with tabs[4]:
             st.markdown('<div class="section-title">📋 <span>原始数据预览</span></div>', unsafe_allow_html=True)
             display_cols = ["policy_tenure","age_of_car","age_of_policyholder","area_label",
                             "population_density","fuel_label","airbags","ncap_label","risk_score","target"]
-            st.dataframe(
-                df_dd[display_cols].head(500).style
-                .background_gradient(subset=["risk_score"], cmap="RdYlGn_r")
-                .format({"policy_tenure":"{:.3f}","age_of_car":"{:.3f}","risk_score":"{:.1f}"}),
-                use_container_width=True, height=300
+            preview_df = df_dd[display_cols].head(500).copy()
+
+            # ── Pure-Python risk_score colorizer (no matplotlib needed) ──
+            def _risk_color(val):
+                """Red-Yellow-Green gradient mapped to risk score 0-100."""
+                try:
+                    v = float(val) / 100.0          # normalise to [0, 1]
+                except (TypeError, ValueError):
+                    return ""
+                v = max(0.0, min(1.0, v))
+                if v < 0.5:                         # green → yellow
+                    r = int(255 * v * 2)
+                    g = 200
+                else:                               # yellow → red
+                    r = 220
+                    g = int(200 * (1 - (v - 0.5) * 2))
+                return (f"background-color: rgba({r},{g},40,0.35);"
+                        f"color: rgb({min(255,r+60)},{min(255,g+60)},120);font-weight:600;")
+
+            def _target_color(val):
+                if val == 1:
+                    return "background-color:rgba(239,83,80,0.25);color:#ef9a9a;font-weight:700;"
+                return "background-color:rgba(25,118,210,0.15);color:#90caf9;"
+
+            styled = (
+                preview_df.style
+                .applymap(_risk_color,   subset=["risk_score"])
+                .applymap(_target_color, subset=["target"])
+                .format({
+                    "policy_tenure": "{:.3f}",
+                    "age_of_car":    "{:.3f}",
+                    "risk_score":    "{:.1f}",
+                })
             )
+            st.dataframe(styled, use_container_width=True, height=320)
     else:
         st.warning("⚠️ 当前筛选条件下无数据，请调整筛选范围")
 
