@@ -1145,7 +1145,7 @@ with tabs[4]:
             styled = (
                 preview_df.style
                 .map(_risk_color, subset=["risk_score"])
-                .applymap(_target_color, subset=["target"])
+                .map(_target_color, subset=["target"])
                 .format({
                     "policy_tenure": "{:.3f}",
                     "age_of_car":    "{:.3f}",
